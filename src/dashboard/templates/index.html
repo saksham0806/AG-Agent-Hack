@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElectroGadget Hub — Autonomous LLM Optimization Dashboard</title>
+    <!-- Outfit Font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom stylesheet -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="glow-container">
+        <div class="glow-sphere sphere-1"></div>
+        <div class="glow-sphere sphere-2"></div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar glass">
+            <div class="brand">
+                <i class="fa-solid fa-microchip brand-icon"></i>
+                <div class="brand-text">
+                    <h1>ElectroGadget</h1>
+                    <span>Agent Dashboard</span>
+                </div>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="#" class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-gauge"></i> Control Center
+                </a>
+                <a href="#" class="nav-item" data-tab="prompts">
+                    <i class="fa-solid fa-file-code"></i> Prompts Config
+                </a>
+                <a href="https://app.phoenix.arize.com" target="_blank" class="nav-item">
+                    <i class="fa-solid fa-chart-line"></i> Arize Phoenix <i class="fa-solid fa-up-right-from-square external-link-icon"></i>
+                </a>
+                <a href="https://gitlab.com" target="_blank" class="nav-item">
+                    <i class="fa-brands fa-gitlab"></i> GitLab Repo <i class="fa-solid fa-up-right-from-square external-link-icon"></i>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="pulse-dot idle" id="global-status-dot"></span>
+                    <span class="status-text" id="global-status-text">Agent Idle</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard Panel -->
+        <main class="main-content">
+            <!-- Header Section -->
+            <header class="main-header glass">
+                <div class="header-title">
+                    <h2>Control Center</h2>
+                    <p>Observe, analyze, and optimize LLM prompts programmatically</p>
+                </div>
+                <div class="header-project">
+                    <span class="label">PHOENIX PROJECT:</span>
+                    <span class="value" id="header-project-name">{{ project_name }}</span>
+                </div>
+            </header>
+
+            <!-- Tab: Dashboard -->
+            <div class="tab-content active" id="tab-dashboard">
+                <!-- Overview Stats Grid -->
+                <section class="stats-grid">
+                    <!-- Stat Card: Overall Accuracy -->
+                    <div class="stat-card glass glow-purple">
+                        <div class="stat-icon-container bg-purple">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Correctness Score</span>
+                            <h3 class="stat-value" id="stat-score">--%</h3>
+                            <span class="stat-subtext" id="stat-score-delta">Baseline correctness rate</span>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card: Active Version -->
+                    <div class="stat-card glass glow-blue">
+                        <div class="stat-icon-container bg-blue">
+                            <i class="fa-solid fa-tags"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Prompt Version</span>
+                            <h3 class="stat-value" id="stat-version">v1.0.0</h3>
+                            <span class="stat-subtext" id="stat-optimizations">0 Programmatic optimizations</span>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card: Failures Identified -->
+                    <div class="stat-card glass glow-gold">
+                        <div class="stat-icon-container bg-gold">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Failures Audited</span>
+                            <h3 class="stat-value" id="stat-failures">0</h3>
+                            <span class="stat-subtext" id="stat-failures-breakdown">No active failure clusters</span>
+                        </div>
+                    </div>
+
+                    <!-- Stat Card: Quick MR Link -->
+                    <div class="stat-card glass glow-emerald">
+                        <div class="stat-icon-container bg-emerald">
+                            <i class="fa-brands fa-git-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-label">Latest Merge Request</span>
+                            <h3 class="stat-value text-small" id="stat-mr-badge">None</h3>
+                            <span class="stat-subtext" id="stat-mr-link">GitOps branch is up to date</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Orchestrator Controls & Live Console Grid -->
+                <section class="control-console-grid">
+                    <!-- Loop Controls Card -->
+                    <div class="card glass loop-controls-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-wand-magic-sparkles text-purple"></i> Optimization Controls</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="controls-desc">Trigger a comprehensive monitoring cycle. The agent will scrape Arize Phoenix telemetry, analyze failure compliance clusters, optimize strategies, shadow-evaluate variants, and open a GitLab Merge Request.</p>
+                            
+                            <div class="control-actions">
+                                <button class="btn btn-primary" id="btn-trigger-optimization">
+                                    <i class="fa-solid fa-play"></i> Trigger Agent Loop
+                                </button>
+                                <button class="btn btn-secondary" id="btn-force-optimization">
+                                    <i class="fa-solid fa-bolt"></i> Force Prompt Engineering
+                                </button>
+                            </div>
+
+                            <div class="loop-progress-container hide" id="loop-progress-container">
+                                <div class="progress-info">
+                                    <span class="progress-step" id="progress-step-text">Starting agent...</span>
+                                    <span class="progress-percent" id="progress-percent-text">0%</span>
+                                </div>
+                                <div class="progress-track">
+                                    <div class="progress-bar" id="progress-bar-fill"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Live Terminal Console -->
+                    <div class="card glass live-console-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-terminal text-green"></i> Live Agent Console</h3>
+                            <span class="terminal-badge pulse-dot-slow running hide" id="terminal-badge-running"></span>
+                        </div>
+                        <div class="card-body terminal-body">
+                            <div class="terminal-content" id="terminal-logs">
+                                <div class="terminal-line system">[SYSTEM] Dashboard client initialized. Standing by for triggers...</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Persistent Run History Matrix -->
+                <section class="history-section card glass">
+                    <div class="card-header flex-header">
+                        <h3><i class="fa-solid fa-clock-rotate-left text-blue"></i> Execution History & Metrics Matrix</h3>
+                        <button class="btn-refresh" id="btn-refresh-history"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <table class="history-table" id="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Project Name</th>
+                                    <th>Status</th>
+                                    <th>Baseline Accuracy</th>
+                                    <th>Optimized Accuracy</th>
+                                    <th>Winner Strategy</th>
+                                    <th>GitLab Merge Request</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" class="empty-state">No execution history available yet. Trigger an agent loop above!</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab: Prompts Config -->
+            <div class="tab-content" id="tab-prompts">
+                <section class="prompt-viewer-grid">
+                    <!-- Prompt Details Card -->
+                    <div class="card glass prompt-details-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-circle-info text-blue"></i> Active Prompt Meta</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="meta-row">
+                                <span class="meta-label">Prompt ID</span>
+                                <span class="meta-value bg-glass" id="prompt-id">customer_support</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Active Version</span>
+                                <span class="meta-value bg-glass accent-green" id="prompt-version">1.0.0</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Model Target</span>
+                                <span class="meta-value bg-glass" id="prompt-model">gemini-2.5-flash</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Temperature</span>
+                                <span class="meta-value bg-glass" id="prompt-temp">0.3</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Optimizations</span>
+                                <span class="meta-value bg-glass" id="prompt-opt-count">0</span>
+                            </div>
+                            <div class="meta-row">
+                                <span class="meta-label">Last Modified</span>
+                                <span class="meta-value bg-glass" id="prompt-optimized-at">--</span>
+                            </div>
+                            <div class="meta-row col-span-2">
+                                <span class="meta-label">Description</span>
+                                <span class="meta-value bg-glass text-wrap" id="prompt-desc">ElectroGadget Hub customer support system prompt</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prompt Instruction Card -->
+                    <div class="card glass prompt-instruction-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-code text-purple"></i> Active System Instructions</h3>
+                        </div>
+                        <div class="card-body prompt-code-body">
+                            <pre class="prompt-code-container"><code class="prompt-code" id="prompt-instructions">Loading prompt instructions...</code></pre>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- UI Interaction Scripts -->
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

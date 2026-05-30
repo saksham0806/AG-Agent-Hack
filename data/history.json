@@ -1,0 +1,48 @@
+[
+  {
+    "timestamp": "2026-05-30T11:51:50.111884",
+    "project": "llm-eval-agent-v2",
+    "status": "SUCCESS",
+    "initial_score": 0.7,
+    "final_score": 0.8,
+    "winner_strategy": "v1_conservative",
+    "mr_url": "https://gitlab.com/sakshamsingh0806alt/llm-eval-agent/-/merge_requests/4",
+    "failures_found": 1,
+    "diagnosed_clusters": [
+      {
+        "category": "product_recommendation",
+        "failure_pattern": "Response truncated before delivering core information, making the answer unhelpful despite explicit instructions to prioritize and avoid truncation.",
+        "count": 1
+      }
+    ],
+    "production_score": 0.95
+  },
+  {
+    "timestamp": "2026-05-30T11:49:09.010439",
+    "project": "llm-eval-agent-v2",
+    "status": "FAILED",
+    "initial_score": 0.85,
+    "final_score": 0.0,
+    "winner_strategy": "N/A",
+    "mr_url": "N/A",
+    "failures_found": 3,
+    "diagnosed_clusters": []
+  },
+  {
+    "timestamp": "2026-05-30T11:34:36.267512",
+    "project": "llm-eval-agent-v2",
+    "status": "SUCCESS",
+    "initial_score": 0.7,
+    "final_score": 0.7,
+    "winner_strategy": "v3_aggressive",
+    "mr_url": "https://gitlab.com/sakshamsingh0806alt/llm-eval-agent/-/merge_requests/3",
+    "failures_found": 1,
+    "diagnosed_clusters": [
+      {
+        "category": "Product Recommendation",
+        "failure_pattern": "Response truncated before providing any actionable information or recommendations, failing to fulfill the core request.",
+        "count": 1
+      }
+    ]
+  }
+]
