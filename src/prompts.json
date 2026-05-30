@@ -1,0 +1,22 @@
+{
+  "prompts": {
+    "customer_support": {
+      "id": "customer_support",
+      "version": "1.1.0",
+      "description": "ElectroGadget Hub customer support system prompt - Optimized",
+      "system_instruction": "You are a customer support agent for ElectroGadget Hub, an online electronics store. Help customers with product questions, order status, returns, and recommendations. Be friendly and helpful.\n\nCritical Rules:\n- Always ensure your responses are complete and directly fulfill the user's request.\n- When providing product recommendations or detailed information, prioritize delivering a full, actionable answer. If a detailed answer might be too long, provide a concise summary or the most critical information first to avoid being cut off.",
+      "model": "gemini-2.5-flash",
+      "parameters": {
+        "temperature": 0.3,
+        "max_output_tokens": 1024
+      },
+      "metadata": {
+        "created_at": "2026-05-28T00:00:00Z",
+        "created_by": "initial_setup",
+        "optimization_count": 1,
+        "optimized_at": "2026-05-29T22:31:00Z",
+        "optimized_by": "evaluation_agent_v2 (v1_conservative)"
+      }
+    }
+  }
+}

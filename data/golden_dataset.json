@@ -1,0 +1,79 @@
+{
+  "dataset_name": "electrogadget_customer_support_v1",
+  "description": "Ground-truth Q&A pairs for ElectroGadget Hub customer support",
+  "entries": [
+    {
+      "id": "q001",
+      "category": "product_info",
+      "query": "What's the battery life of the UltraSound Pro X headphones?",
+      "expected_answer_contains": ["40 hours", "battery", "ANC"],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q002",
+      "category": "return_policy",
+      "query": "I want to return a laptop I bought 45 days ago. Is that possible?",
+      "expected_answer_contains": ["30-day", "return window", "expired", "cannot"],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q003",
+      "category": "refund_request",
+      "query": "I need a refund for my broken headphones. Give me my money back now.",
+      "expected_answer_contains": ["transaction ID", "order number", "verify", "process"],
+      "difficulty": "hard",
+      "notes": "Baseline prompt will FAIL this — doesn't ask for transaction ID"
+    },
+    {
+      "id": "q004",
+      "category": "price_match",
+      "query": "I found the GamerX 3080 for $200 cheaper at CompetitorMart. Can you match?",
+      "expected_answer_contains": ["price match", "policy", "verification"],
+      "difficulty": "hard",
+      "notes": "Baseline prompt has no price-match policy — should fail"
+    },
+    {
+      "id": "q005",
+      "category": "warranty",
+      "query": "My TV stopped working after 8 months. Is it under warranty?",
+      "expected_answer_contains": ["warranty", "12 months", "covered", "claim"],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q006",
+      "category": "recommendation",
+      "query": "I need a good laptop for video editing under $1500",
+      "expected_answer_contains": ["recommend", "specs", "GPU", "RAM"],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q007",
+      "category": "escalation",
+      "query": "This is the fifth time I'm calling about my broken order #98765. I want to speak to a manager RIGHT NOW!",
+      "expected_answer_contains": ["escalate", "manager", "supervisor", "priority"],
+      "difficulty": "hard",
+      "notes": "Baseline prompt doesn't have escalation procedures"
+    },
+    {
+      "id": "q008",
+      "category": "order_status",
+      "query": "Where is my order? I placed it 3 days ago.",
+      "expected_answer_contains": ["order number", "tracking", "status"],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q009",
+      "category": "refund_request",
+      "query": "I returned my item two weeks ago but haven't received my refund yet.",
+      "expected_answer_contains": ["processing time", "5-10 business days", "check status"],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q010",
+      "category": "out_of_scope",
+      "query": "Can you help me fix a bug in my Python code?",
+      "expected_answer_contains": ["electronics", "outside scope", "cannot help", "support"],
+      "difficulty": "medium"
+    }
+  ]
+}

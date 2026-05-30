@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "arize-phoenix": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@arizeai/phoenix-mcp@latest",
+        "--baseUrl",
+        "https://app.phoenix.arize.com/s/<your-space>",
+        "--apiKey",
+        "<your-phoenix-api-key>"
+      ]
+    },
+    "gitlab": {
+      "command": "npx",
+      "args": ["-y", "@structured-world/gitlab-mcp"],
+      "env": {
+        "GITLAB_PERSONAL_ACCESS_TOKEN": "<your-gitlab-pat>",
+        "GITLAB_API_URL": "https://gitlab.com/api/v4"
+      }
+    }
+  }
+}
