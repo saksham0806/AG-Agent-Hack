@@ -40,17 +40,26 @@ def simulate(num_runs: int = 20, delay: float = 1.0):
     """
     entries = load_golden_dataset()
     
-    print(f"🚀 Starting traffic simulation: {num_runs} queries")
-    print(f"📊 Golden dataset has {len(entries)} unique queries")
+    # Shuffle and pick WITHOUT replacement to guarantee 100% uniqueness
+    selected_entries = entries.copy()
+    random.shuffle(selected_entries)
+    
+    if num_runs > len(selected_entries):
+        print(f"⚠️ Warning: Requested {num_runs} runs but only {len(selected_entries)} unique queries exist.")
+        print(f"Capping runs at {len(selected_entries)} to guarantee 100% uniqueness of traces.")
+        num_runs = len(selected_entries)
+        
+    selected_entries = selected_entries[:num_runs]
+    
+    print(f"🚀 Starting traffic simulation: {num_runs} queries (100% unique, sampled without replacement)")
+    print(f"📊 Golden dataset has {len(entries)} unique queries available")
     print(f"⏱️  Delay between requests: {delay}s")
     print("-" * 60)
     
     success_count = 0
     error_count = 0
     
-    for i in range(num_runs):
-        # Pick a random entry (weighted toward harder ones or just uniform)
-        entry = random.choice(entries)
+    for i, entry in enumerate(selected_entries):
         query = entry["query"]
         
         print(f"\n[{i+1}/{num_runs}] Category: {entry['category']} | Difficulty: {entry['difficulty']}")

@@ -49,7 +49,7 @@ def get_prompt_config(prompt_id: str) -> dict:
 
 def run_customer_support(query: str, prompt_id: str = "customer_support") -> str:
     """
-    Run the customer support LLM with the specified prompt template.
+    Run the customer support LLM with the specified prompt template, with retries on transient errors.
     
     Args:
         query: The customer's question or request
@@ -58,6 +58,7 @@ def run_customer_support(query: str, prompt_id: str = "customer_support") -> str
     Returns:
         The LLM's response string
     """
+    import time
     config = get_prompt_config(prompt_id)
     
     api_key = os.getenv("GOOGLE_API_KEY")
@@ -66,17 +67,31 @@ def run_customer_support(query: str, prompt_id: str = "customer_support") -> str
         
     client = genai.Client(api_key=api_key)
     
-    response = client.models.generate_content(
-        model=config["model"],
-        contents=query,
-        config=genai.types.GenerateContentConfig(
-            system_instruction=config["system_instruction"],
-            temperature=config["parameters"]["temperature"],
-            max_output_tokens=config["parameters"]["max_output_tokens"],
-        )
-    )
+    max_retries = 4
+    initial_delay = 2.0
+    delay = initial_delay
     
-    return response.text
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model=config["model"],
+                contents=query,
+                config=genai.types.GenerateContentConfig(
+                    system_instruction=config["system_instruction"],
+                    temperature=config["parameters"]["temperature"],
+                    max_output_tokens=config["parameters"]["max_output_tokens"],
+                )
+            )
+            return response.text
+        except Exception as e:
+            if attempt == max_retries - 1:
+                print(f"❌ Gemini API call failed after {max_retries} attempts: {e}")
+                raise e
+            err_msg = str(e)
+            trimmed_err = err_msg[:120] + "..." if len(err_msg) > 120 else err_msg
+            print(f"⚠️ Gemini API transient error (attempt {attempt+1}/{max_retries}): {trimmed_err}. Retrying in {delay:.1f}s...")
+            time.sleep(delay)
+            delay *= 2.0
 
 if __name__ == "__main__":
     import sys

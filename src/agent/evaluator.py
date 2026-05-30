@@ -133,13 +133,20 @@ Format your output as a structured JSON object matching the requested schema.
                 "reason": f"Evaluation error: {str(e)}"
             }
 
-    def _evaluate_candidate(self, variant: dict) -> dict:
+    def _evaluate_candidate(self, variant: dict, sample_size: int = None) -> dict:
         """
         Evaluate a single prompt variant against the entire golden dataset.
         """
         print(f"\nEvaluating variant '{variant.get('id')}' (Strategy: {variant.get('strategy')})...")
         
         entries = self.dataset.get("entries", [])
+        if sample_size and sample_size < len(entries):
+            import random
+            rng = random.Random(42)  # Fixed seed for consistent evaluations across all candidates
+            entries = rng.sample(entries, sample_size)
+            entries.sort(key=lambda x: x.get("id", ""))
+            print(f"🔬 Sampled {sample_size} queries from golden dataset for consistent shadow evaluation.")
+            
         total_entries = len(entries)
         if total_entries == 0:
             return {"accuracy": 0.0, "avg_keyword_pass_rate": 0.0, "avg_latency": 0.0, "avg_output_tokens": 0.0, "results": []}
@@ -241,19 +248,19 @@ Format your output as a structured JSON object matching the requested schema.
             "results": results
         }
 
-    def run_shadow_evaluation(self, baseline_variant: dict, candidate_variants: List[dict]) -> dict:
+    def run_shadow_evaluation(self, baseline_variant: dict, candidate_variants: List[dict], sample_size: int = 15) -> dict:
         """
         Run shadow evaluations for baseline + 3 candidate variants and select a statistical winner.
         """
-        print("Starting Shadow Evaluations...")
+        print(f"Starting Shadow Evaluations on sample size: {sample_size}...")
         
         # 1. Evaluate baseline
-        baseline_report = self._evaluate_candidate(baseline_variant)
+        baseline_report = self._evaluate_candidate(baseline_variant, sample_size=sample_size)
         
         # 2. Evaluate candidates
         candidate_reports = []
         for cand in candidate_variants:
-            report = self._evaluate_candidate(cand)
+            report = self._evaluate_candidate(cand, sample_size=sample_size)
             candidate_reports.append(report)
             
         # 3. Combine reports and pick winner

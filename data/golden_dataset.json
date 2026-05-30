@@ -1,79 +1,852 @@
 {
-  "dataset_name": "electrogadget_customer_support_v1",
-  "description": "Ground-truth Q&A pairs for ElectroGadget Hub customer support",
+  "dataset_name": "electrogadget_customer_support_v2_large",
+  "description": "Expanded ground-truth Q&A pairs (72 unique items) for ElectroGadget Hub",
   "entries": [
     {
       "id": "q001",
       "category": "product_info",
-      "query": "What's the battery life of the UltraSound Pro X headphones?",
-      "expected_answer_contains": ["40 hours", "battery", "ANC"],
+      "query": "Hello, I'm very interested in purchasing the 'AcousticFlow X' noise-cancelling headphones. Could you please tell me the exact impedance and the full frequency response range? I'm an audiophile and these technical details are crucial for my decision. Thank you!",
+      "expected_answer_contains": [
+        "impedance",
+        "frequency response",
+        "specifications"
+      ],
       "difficulty": "easy"
     },
     {
       "id": "q002",
-      "category": "return_policy",
-      "query": "I want to return a laptop I bought 45 days ago. Is that possible?",
-      "expected_answer_contains": ["30-day", "return window", "expired", "cannot"],
+      "category": "product_info",
+      "query": "I'm concerned about the battery life of the 'LumiFit Pro' smartwatch. I've heard mixed reviews. Can you provide the estimated battery life under typical usage, including GPS tracking, and also tell me if there are any specific power-saving modes available? I really need it to last through my long hikes.",
+      "expected_answer_contains": [
+        "battery life",
+        "usage",
+        "hours",
+        "power saving"
+      ],
       "difficulty": "medium"
     },
     {
       "id": "q003",
-      "category": "refund_request",
-      "query": "I need a refund for my broken headphones. Give me my money back now.",
-      "expected_answer_contains": ["transaction ID", "order number", "verify", "process"],
-      "difficulty": "hard",
-      "notes": "Baseline prompt will FAIL this — doesn't ask for transaction ID"
+      "category": "product_info",
+      "query": "I need to know the precise screen size and native resolution of the 'GamerX 3080 Laptop'. I'm a competitive gamer and every pixel counts, so please be specific about the display panel's capabilities.",
+      "expected_answer_contains": [
+        "screen size",
+        "resolution",
+        "display",
+        "pixels"
+      ],
+      "difficulty": "easy"
     },
     {
       "id": "q004",
-      "category": "price_match",
-      "query": "I found the GamerX 3080 for $200 cheaper at CompetitorMart. Can you match?",
-      "expected_answer_contains": ["price match", "policy", "verification"],
-      "difficulty": "hard",
-      "notes": "Baseline prompt has no price-match policy — should fail"
+      "category": "product_info",
+      "query": "I bought headphones from another brand last month and they weren't compatible with my specific device. Before I order the 'SonicBoom Wireless Earbuds', I need to confirm if they are fully compatible with an iPhone 13 running iOS 17 and also my Windows 11 desktop. I don't want to make the same mistake again.",
+      "expected_answer_contains": [
+        "compatible",
+        "operating system",
+        "Bluetooth",
+        "device"
+      ],
+      "difficulty": "medium"
     },
     {
       "id": "q005",
-      "category": "warranty",
-      "query": "My TV stopped working after 8 months. Is it under warranty?",
-      "expected_answer_contains": ["warranty", "12 months", "covered", "claim"],
-      "difficulty": "medium"
+      "category": "product_info",
+      "query": "I'm planning to buy the 'ChronoPulse Smartwatch' as a gift for my sister's birthday next week. Could you please confirm what exactly comes in the box? I want to make sure it includes the charging cable and any extra straps, so I don't have to buy anything separately. It needs to be perfect!",
+      "expected_answer_contains": [
+        "box contents",
+        "charger",
+        "straps",
+        "manual"
+      ],
+      "difficulty": "easy"
     },
     {
       "id": "q006",
-      "category": "recommendation",
-      "query": "I need a good laptop for video editing under $1500",
-      "expected_answer_contains": ["recommend", "specs", "GPU", "RAM"],
-      "difficulty": "easy"
+      "category": "product_info",
+      "query": "Regarding the 'PowerBook Elite 2023' laptop, I'm considering purchasing it but want to know its upgrade potential. Specifically, how many RAM slots does it have, what type of RAM (e.g., DDR4, DDR5) is supported, and what is the maximum upgradeable RAM capacity? I plan to use it for heavy video editing.",
+      "expected_answer_contains": [
+        "RAM slots",
+        "upgradeable",
+        "maximum capacity",
+        "DDR4"
+      ],
+      "difficulty": "hard"
     },
     {
       "id": "q007",
-      "category": "escalation",
-      "query": "This is the fifth time I'm calling about my broken order #98765. I want to speak to a manager RIGHT NOW!",
-      "expected_answer_contains": ["escalate", "manager", "supervisor", "priority"],
-      "difficulty": "hard",
-      "notes": "Baseline prompt doesn't have escalation procedures"
+      "category": "product_info",
+      "query": "I'm a very active person and I'm looking for new headphones for my intense workouts and outdoor runs. How water resistant are the 'AquaBeats Sport' headphones? Can they handle heavy sweat and occasional rain showers, or are they just splash-proof? What's their official IPX rating?",
+      "expected_answer_contains": [
+        "water resistant",
+        "IPX rating",
+        "sweatproof",
+        "rain"
+      ],
+      "difficulty": "medium"
     },
     {
       "id": "q008",
-      "category": "order_status",
-      "query": "Where is my order? I placed it 3 days ago.",
-      "expected_answer_contains": ["order number", "tracking", "status"],
-      "difficulty": "easy"
+      "category": "product_info",
+      "query": "I'm a serious cyclist and I need a smartwatch with very accurate GPS tracking for my routes. How precise is the GPS on the 'VeloTrack X' smartwatch, and does it support multi-GNSS systems like GLONASS or Galileo? Also, does it have any built-in mapping features or require a paired phone?",
+      "expected_answer_contains": [
+        "GPS accuracy",
+        "tracking",
+        "maps",
+        "multi-sport"
+      ],
+      "difficulty": "hard"
     },
     {
       "id": "q009",
-      "category": "refund_request",
-      "query": "I returned my item two weeks ago but haven't received my refund yet.",
-      "expected_answer_contains": ["processing time", "5-10 business days", "check status"],
-      "difficulty": "medium"
+      "category": "product_info",
+      "query": "Could you list all the available ports on the 'CreatorPro 15' laptop? I specifically need to know how many USB-C ports it has, if any of them support Thunderbolt, and the type of HDMI port (e.g., 2.0, 2.1). I have a lot of peripherals to connect.",
+      "expected_answer_contains": [
+        "USB-C",
+        "HDMI",
+        "ports",
+        "connectivity"
+      ],
+      "difficulty": "easy"
     },
     {
       "id": "q010",
-      "category": "out_of_scope",
-      "query": "Can you help me fix a bug in my Python code?",
-      "expected_answer_contains": ["electronics", "outside scope", "cannot help", "support"],
+      "category": "return_policy",
+      "query": "Hello, I recently bought a pair of ElectroSound Max Headphones from your website about 10 days ago, and while they're great, I've decided I prefer my old ones. What's your process for returning them for a full refund? I still have the box and my digital receipt.",
+      "expected_answer_contains": [
+        "30 days",
+        "original packaging",
+        "receipt",
+        "full refund"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q011",
+      "category": "return_policy",
+      "query": "Hi, I purchased a SmartHome Hub Pro from you guys 25 days ago. I'm having second thoughts about it and might want to return it. Am I still within the return window, or is it getting too close to the deadline? I want to make sure I don't miss it.",
+      "expected_answer_contains": [
+        "within 30 days",
+        "full refund",
+        "proof of purchase"
+      ],
       "difficulty": "medium"
+    },
+    {
+      "id": "q012",
+      "category": "return_policy",
+      "query": "This is ridiculous! I bought a GamerX 3080 Laptop from your store exactly 35 days ago, and I just realized it's not powerful enough for my needs. Your policy says 30 days, but surely there's some flexibility? I spent a lot of money on this, can't you make an exception?",
+      "expected_answer_contains": [
+        "30-day policy",
+        "return window expired",
+        "cannot accept"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q013",
+      "category": "return_policy",
+      "query": "I am absolutely furious! My UltraSound Pro X Speaker, which I bought 45 days ago, has completely stopped working. It was expensive, and now it's just a paperweight. I demand to return it for a full refund immediately!",
+      "expected_answer_contains": [
+        "30-day return",
+        "warranty claim",
+        "manufacturer"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q014",
+      "category": "return_policy",
+      "query": "Hey there, I found the receipt for a VoltCharge Powerbank I bought like 60 days ago. Is it still possible to return it? I decided I don't really need it after all.",
+      "expected_answer_contains": [
+        "return period",
+        "lapsed",
+        "no longer eligible"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q015",
+      "category": "return_policy",
+      "query": "Hi! I got an AeroFlow Portable Fan from you about 5 days ago, and I love it, but I really wanted it in blue instead of white. Can I easily exchange it for a different color?",
+      "expected_answer_contains": [
+        "30 days",
+        "exchange",
+        "stock availability"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q016",
+      "category": "return_policy",
+      "query": "I'm quite disappointed. I finally unboxed my QuantumView Monitor, purchased 32 days ago, and the picture quality isn't what I expected. I know it's slightly past 30 days, but it's practically new. Is there anything at all you can do to help me return it?",
+      "expected_answer_contains": [
+        "30-day limit",
+        "past the return",
+        "final sale"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q017",
+      "category": "return_policy",
+      "query": "URGENT! I bought a Zenith Smartwatch 29 days ago, and I absolutely need to return it, but I'm traveling for work and won't be back until day 31. Is there any way to get an extension or process the return remotely so I don't miss the deadline?",
+      "expected_answer_contains": [
+        "30-day window",
+        "return by",
+        "store credit"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q018",
+      "category": "return_policy",
+      "query": "Look, I was explicitly told when I bought this FusionPro Keyboard 50 days ago that I had a 90-day return window! Now you're telling me it's 30 days? This is false advertising! I expect to return this item and get my money back, no questions asked!",
+      "expected_answer_contains": [
+        "standard 30-day",
+        "no exception",
+        "policy states"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q019",
+      "category": "refund_request",
+      "query": "Hello, I recently purchased an ElectroGadget SmartWatch 5 from your website. While it's a great device, I've decided it's not quite what I need. I'd like to initiate a return and get a refund. Could you please guide me through the process?",
+      "expected_answer_contains": [
+        "order number",
+        "return policy",
+        "original packaging",
+        "refund process"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q020",
+      "category": "refund_request",
+      "query": "I received my UltraSound Pro X Headphones today, and I'm very frustrated. One of the ear cups isn't producing any sound right out of the box. This is unacceptable for a premium product. I need to return these and get a full refund.",
+      "expected_answer_contains": [
+        "damaged item",
+        "return shipping",
+        "replacement",
+        "full refund"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q021",
+      "category": "refund_request",
+      "query": "What is going on? I ordered a GamerX 3080 Laptop, which costs a fortune, and you sent me an 'OfficePro 2000'! This is completely wrong! I need this rectified immediately and my actual order sent out, or I want a full refund for this massive screw-up!",
+      "expected_answer_contains": [
+        "wrong item",
+        "correct order",
+        "expedited shipping",
+        "immediate refund"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q022",
+      "category": "refund_request",
+      "query": "I bought a VoltCharge Powerbank 10000mAh from you just last week, and now it won't charge anything. It just completely died. I'm really disappointed as I rely on it for travel. I'd like to return it for a refund.",
+      "expected_answer_contains": [
+        "defective",
+        "troubleshooting",
+        "warranty",
+        "return authorization"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q023",
+      "category": "refund_request",
+      "query": "I'm looking at my credit card statement and it seems I've been double charged for an ElectroBright LED Strip Kit. I definitely only ordered one. Can you please look into this and refund the extra charge?",
+      "expected_answer_contains": [
+        "duplicate charge",
+        "billing statement",
+        "transaction ID",
+        "resolve discrepancy"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q024",
+      "category": "refund_request",
+      "query": "I received my AuraFlow Smart Air Purifier today, but it seems to be missing the remote control that was advertised as included. The box was sealed, but it's not there. I'd prefer a refund if the complete item cannot be provided quickly.",
+      "expected_answer_contains": [
+        "missing part",
+        "shipment contents",
+        "send missing item",
+        "partial refund"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q025",
+      "category": "refund_request",
+      "query": "My QuantumCore Desktop PC, which I purchased a month ago, has been consistently underperforming and crashing. I've tried all the standard troubleshooting steps. It's not living up to the specifications advertised. I need to return this system for a full refund.",
+      "expected_answer_contains": [
+        "performance issues",
+        "technical support",
+        "return merchandise authorization",
+        "full refund"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q026",
+      "category": "refund_request",
+      "query": "I bought a SonicBlast Portable Speaker as a gift for a friend, but they already have one they love. It's still in its sealed box, unused. I'd like to return it for a refund. What's the process for returning a gift?",
+      "expected_answer_contains": [
+        "gift return",
+        "proof of purchase",
+        "store credit",
+        "original payment"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q027",
+      "category": "refund_request",
+      "query": "The VisionPro VR Headset I received is not at all what was described on your website. The field of view and refresh rate are significantly lower than advertised, making the experience very poor. I feel misled and want to return it for a full refund.",
+      "expected_answer_contains": [
+        "misleading description",
+        "product specifications",
+        "return shipping label",
+        "refund eligibility"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q028",
+      "category": "price_match",
+      "query": "Hello, I recently saw the UltraSound Pro X headphones on your website for $299, but CompetitorMart has them for $269.99 right now. Would you be able to price match this for me? I have a screenshot of their current ad.",
+      "expected_answer_contains": [
+        "price match",
+        "CompetitorMart",
+        "ad verification"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q029",
+      "category": "price_match",
+      "query": "URGENT! I just bought the GamerX 3080 Laptop from you yesterday for $1800, but TechGiant is selling it for $1650 today! Can you please price match this immediately? I need to know if I should return yours and buy from them instead.",
+      "expected_answer_contains": [
+        "price adjustment",
+        "TechGiant",
+        "within 7 days"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q030",
+      "category": "price_match",
+      "query": "This is ridiculous! I bought your VoltCharge Powerbank last week for $45, and now I see it on ElectroDeals.com for $30. Why is there such a huge difference? Can you honor their price? I feel ripped off!",
+      "expected_answer_contains": [
+        "online retailers",
+        "price match policy",
+        "eligible"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q031",
+      "category": "price_match",
+      "query": "I'm interested in purchasing the SmartView 4K Monitor, which you have listed for $499. However, I found it at BestBuy for $475. Do you offer price matching for in-store competitors like BestBuy, and what's the process?",
+      "expected_answer_contains": [
+        "BestBuy",
+        "price match",
+        "current advertised price"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q032",
+      "category": "price_match",
+      "query": "I'm a bit annoyed. I purchased the AuraFlow Smart Humidifier from your store last Friday, and now I see it on Amazon for $15 less. Can ElectroGadget Hub match Amazon's price, or is it too late since I already bought it?",
+      "expected_answer_contains": [
+        "Amazon",
+        "price adjustment",
+        "proof of price"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q033",
+      "category": "price_match",
+      "query": "I'm hoping to get a good deal on the Zenith Noise-Cancelling Headphones. I saw them at Target for $179.99, but your price is $199. Is it possible to get a price match on these, and what documentation would I need?",
+      "expected_answer_contains": [
+        "Target",
+        "competitor's ad",
+        "price match guarantee"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q034",
+      "category": "price_match",
+      "query": "I'm looking to buy the RoboVac 9000. Your price is $399.99, but Walmart has it for $370. Can you match Walmart's price?",
+      "expected_answer_contains": [
+        "Walmart",
+        "price match program",
+        "item in stock"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q035",
+      "category": "price_match",
+      "query": "I'm concerned about my recent purchase of the Quantum Leap Gaming Keyboard. I paid $120 for it with you, but I just found it on Newegg for $99.99. What are my options for a price match or adjustment?",
+      "expected_answer_contains": [
+        "Newegg",
+        "price match request",
+        "difference refunded"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q036",
+      "category": "price_match",
+      "query": "Could you tell me if you price match online-only retailers for the EchoSound Bluetooth Speaker? I saw it on 'GadgetDeals.net' for a significantly lower price than what you have listed, and I'd prefer to buy from you.",
+      "expected_answer_contains": [
+        "online retailers",
+        "price match policy",
+        "verification"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q037",
+      "category": "warranty",
+      "query": "My ElectroSound Bluetooth Speaker, which I bought just 6 months ago, suddenly stopped charging last night. It was working perfectly fine before, and I haven't dropped it or exposed it to water. What are my options under the warranty?",
+      "expected_answer_contains": [
+        "warranty",
+        "6 months",
+        "repair",
+        "replacement"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q038",
+      "category": "warranty",
+      "query": "I'm extremely frustrated! My LumiPad Pro Tablet, purchased only 3 months ago, developed a thin dead pixel line on the screen last week, and now the entire screen is completely black. There's no physical damage to the tablet at all. Is this covered by the warranty?",
+      "expected_answer_contains": [
+        "screen",
+        "warranty",
+        "defect",
+        "assessment"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q039",
+      "category": "warranty",
+      "query": "Help! My VoltCharge Powerbank Xtreme, bought 8 months ago, used to last for days, but now it barely holds a charge for 15 minutes before dying. The battery life has severely degraded. Can I get this replaced under warranty?",
+      "expected_answer_contains": [
+        "battery",
+        "degradation",
+        "warranty claim",
+        "troubleshooting"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q040",
+      "category": "warranty",
+      "query": "I'm quite disappointed. My SmartWatch Aura, which I purchased about 14 months ago, just stopped turning on yesterday. It's completely dead. I know the standard warranty is usually a year, but is there anything at all that can be done?",
+      "expected_answer_contains": [
+        "12-month",
+        "expired",
+        "out of warranty",
+        "paid repair"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q041",
+      "category": "warranty",
+      "query": "Oh no, my GamerX 3080 Laptop, which is only 5 months old, accidentally fell off my desk and now the screen is cracked. It was a minor fall, but the display is completely messed up. Does the warranty cover accidental damage like this?",
+      "expected_answer_contains": [
+        "accidental damage",
+        "not covered",
+        "repair cost",
+        "estimate"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q042",
+      "category": "warranty",
+      "query": "I left my UltraSound Pro X Headphones in my car on a really hot day, and now the battery won't hold a charge at all. I bought them 7 months ago. Surely, the battery should be more robust than that? Is this covered by the warranty?",
+      "expected_answer_contains": [
+        "misuse",
+        "voids warranty",
+        "environmental damage",
+        "replacement options"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q043",
+      "category": "warranty",
+      "query": "My HomeAssistant Hub Max stopped responding entirely after 18 months of use. I recall purchasing an extended 2-year warranty when I bought it. How do I go about making a claim for this extended coverage?",
+      "expected_answer_contains": [
+        "extended warranty",
+        "coverage",
+        "claim process",
+        "proof of purchase"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q044",
+      "category": "warranty",
+      "query": "I'm getting really annoyed with my StreamCast 4K Dongle. I bought it 4 months ago, and lately, it keeps intermittently disconnecting from my TV and gets incredibly hot. It's not completely broken, but it's unreliable. What's the warranty procedure for this kind of issue?",
+      "expected_answer_contains": [
+        "intermittent issues",
+        "troubleshooting steps",
+        "replacement",
+        "diagnostic"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q045",
+      "category": "warranty",
+      "query": "I'm considering buying the new FutureTech VR Headset. Before I commit, could you please tell me what the standard warranty period is for this product and what types of issues are typically covered?",
+      "expected_answer_contains": [
+        "standard warranty",
+        "12 months",
+        "manufacturing defects",
+        "terms and conditions"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q046",
+      "category": "recommendation",
+      "query": "Hi, I'm a student looking for a new laptop for video editing and graphic design. My budget is strictly under $1500. I need something with a powerful processor, at least 16GB RAM, and a dedicated graphics card. I've heard good things about the 'PixelRender 5000' but it's a bit out of my price range. Can you recommend a few alternatives that meet these specs?",
+      "expected_answer_contains": [
+        "video editing",
+        "16GB RAM",
+        "dedicated GPU",
+        "under $1500"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q047",
+      "category": "recommendation",
+      "query": "Hey there! I'm an avid gym-goer and my old 'SonicBoost' headphones just gave up. I need some new wireless headphones that are sweat-resistant, have really strong bass for my workouts, and won't fall out during intense cardio. My budget is around $100-$150. What do you suggest?",
+      "expected_answer_contains": [
+        "wireless",
+        "sweat-resistant",
+        "bass",
+        "gym"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q048",
+      "category": "recommendation",
+      "query": "Good morning! I'm looking to get my first smartwatch primarily for health tracking \u2013 heart rate, sleep, steps, etc. I also need excellent battery life, ideally several days, and it absolutely must be compatible with my Android phone. I'm not interested in making calls from it, just notifications and health data. Any recommendations under $300?",
+      "expected_answer_contains": [
+        "health tracking",
+        "Android compatible",
+        "battery life",
+        "smartwatch"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q049",
+      "category": "recommendation",
+      "query": "URGENT! My 'GamerX 500' mouse just broke during a ranked match! I need a new gaming mouse, fast. I play a lot of competitive FPS games like Valorant and CS:GO, so it needs to be super lightweight, have an extremely precise sensor (DPI 16000+), and ideally, configurable buttons. My budget is up to $80. What's the best option you have right now for a serious gamer?",
+      "expected_answer_contains": [
+        "gaming mouse",
+        "FPS",
+        "lightweight",
+        "precise sensor"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q050",
+      "category": "recommendation",
+      "query": "Hello, I'm looking for a reliable laptop for my daughter who's starting high school. It's mainly for schoolwork, browsing, and watching videos, so nothing too fancy. Durability is a big plus as she can be a bit clumsy. We're hoping to spend around $500-$700. Do you have any recommendations for a sturdy, general-purpose laptop?",
+      "expected_answer_contains": [
+        "high school",
+        "durable",
+        "general use",
+        "under $700"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q051",
+      "category": "recommendation",
+      "query": "Hi, I commute a lot on public transport and the noise is driving me crazy. I need a really effective pair of noise-cancelling headphones. Comfort is key, as I'll be wearing them for hours. I also prefer over-ear style. My budget is flexible, but I'd like to see options in the $200-$400 range. What are your top picks for superior noise cancellation and comfort?",
+      "expected_answer_contains": [
+        "noise-cancelling",
+        "over-ear",
+        "comfortable",
+        "commuting"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q052",
+      "category": "recommendation",
+      "query": "I'm upgrading my gaming setup and need a new mechanical keyboard. I'm really into RGB lighting, so that's a must-have. I play a variety of PC games, from RPGs to RTS, so a good tactile feel is important. I'm looking for something durable and responsive. My budget is around $120. Do you have any recommendations for a solid mechanical RGB gaming keyboard?",
+      "expected_answer_contains": [
+        "mechanical keyboard",
+        "RGB lighting",
+        "gaming",
+        "tactile"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q053",
+      "category": "recommendation",
+      "query": "I'm trying to find a smartwatch for my elderly mother. Her main needs are fall detection and basic health monitoring like heart rate. It needs to have a very simple, easy-to-read interface, and ideally, be able to alert me if there's an issue. Compatibility isn't a huge concern as long as it works standalone or with a basic smartphone. What would you recommend for senior-friendly features?",
+      "expected_answer_contains": [
+        "elderly",
+        "fall detection",
+        "easy interface",
+        "health monitoring"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q054",
+      "category": "recommendation",
+      "query": "I'm a professional photographer and I desperately need a new portable SSD. My current 'PhotoVault 500GB' is too small and slow. I need at least 1TB capacity, something extremely fast for transferring large RAW files, and durable enough to withstand travel. My budget is up to $180. What are the best high-performance portable SSDs you recommend for photographers?",
+      "expected_answer_contains": [
+        "portable SSD",
+        "1TB",
+        "fast transfer",
+        "photographer"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q055",
+      "category": "escalation",
+      "query": "This is the THIRD time I'm calling about my lost package! I ordered the AeroSound Noise-Cancelling Headphones over two weeks ago, and the tracking hasn't updated since it supposedly left your warehouse. Your last agent told me to 'just wait a few more days,' but I've waited long enough! Where is my order?! I paid for expedited shipping!",
+      "expected_answer_contains": [
+        "apologize",
+        "investigate",
+        "supervisor",
+        "resolution"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q056",
+      "category": "escalation",
+      "query": "I am absolutely furious! I bought the GamerX 3080 Laptop last month, and it arrived with a faulty graphics card. You sent a replacement, and guess what? That one also has a defective screen! This is beyond unacceptable! I've spent hours on the phone with your support, and I demand to speak to a manager immediately. I want a full refund or a guaranteed working unit, not another lemon!",
+      "expected_answer_contains": [
+        "understand frustration",
+        "manager review",
+        "immediate action",
+        "compensation"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q057",
+      "category": "escalation",
+      "query": "This is my third attempt to resolve an incorrect charge on my account for the CloudSync Pro subscription. I was billed for an annual plan when I specifically signed up for monthly, and your last two agents couldn't fix it. My bank statement clearly shows the wrong amount. If this isn't resolved by end of day, I'm disputing the charge and cancelling everything!",
+      "expected_answer_contains": [
+        "billing department",
+        "senior agent",
+        "resolve error",
+        "credit"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q058",
+      "category": "escalation",
+      "query": "Your warranty department is a joke! My UltraVision 4K Monitor stopped working within six months, clearly a manufacturing defect. I've sent all the diagnostic reports and videos, but my claim was denied, stating 'user misuse' which is completely false. This is my fourth time explaining the exact same issue. I want a review by someone competent, or I'm taking my business elsewhere!",
+      "expected_answer_contains": [
+        "review claim",
+        "specialist team",
+        "re-evaluate",
+        "next steps"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q059",
+      "category": "escalation",
+      "query": "I am absolutely livid! Your technician botched the installation of my SmartHome Security System last week, causing a visible scratch on my newly painted wall. I've called five times since then, and nobody has followed up or offered a solution. I expect compensation for the damage and a proper resolution, not just empty promises! Get a manager on the line NOW!",
+      "expected_answer_contains": [
+        "damage report",
+        "service manager",
+        "investigate incident",
+        "repair costs"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q060",
+      "category": "escalation",
+      "query": "Where is my refund?! Two weeks ago, I returned a faulty VoltCharge Powerbank, and your agent, Sarah, promised me a full refund within 3-5 business days. It's been 10 business days, and there's nothing in my account. I was just told by another agent that they 'can't find any record of it.' This is unacceptable! I want my money back immediately!",
+      "expected_answer_contains": [
+        "refund status",
+        "escalate to finance",
+        "tracking number",
+        "expedite"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q061",
+      "category": "escalation",
+      "query": "This is beyond ridiculous! I ordered the QuantumFlow Water Purifier (Model QF-7000) and you sent me the wrong model (QF-5000). I returned it, and you just sent me the WRONG MODEL AGAIN! How hard is it to ship the correct item? This is the third time there's been a shipping error. I'm completely fed up and I want this resolved by a senior staff member, not another entry-level agent!",
+      "expected_answer_contains": [
+        "shipping error",
+        "quality control",
+        "correct item",
+        "expedited delivery"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q062",
+      "category": "escalation",
+      "query": "I just spoke with one of your representatives, and they were incredibly rude and unhelpful regarding my account inquiry. This is the second time I've called about the same issue, and I was treated with disrespect. I want to speak to their manager or a supervisor immediately to file a formal complaint and get my original issue finally resolved.",
+      "expected_answer_contains": [
+        "apologize for experience",
+        "management review",
+        "feedback",
+        "resolve issue"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q063",
+      "category": "escalation",
+      "query": "My business has been down for 48 hours because the ServerRack Cooling Unit Pro I bought from you is completely dead! This is critical infrastructure, and my previous calls were not treated with the urgency they deserved. Every hour this unit is down costs my company thousands. I need immediate advanced technical support and a replacement shipped overnight, or I will consider legal action for business interruption!",
+      "expected_answer_contains": [
+        "critical issue",
+        "technical support lead",
+        "expedite replacement",
+        "business impact"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q064",
+      "category": "out_of_scope",
+      "query": "Hello, I just bought your 'SmartConnect Hub 2.0' and I'm trying to integrate it with a custom Python script for my home automation. I'm getting a 'KeyError' when trying to access a dictionary element that should be there. Can you please help me debug my Python code? I'm really stuck and the manual doesn't cover this.",
+      "expected_answer_contains": [
+        "outside our scope",
+        "programming assistance",
+        "cannot debug",
+        "focus on product functionality"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q065",
+      "category": "out_of_scope",
+      "query": "Hi ElectroGadget Hub! I'm planning a dinner party and I just got your 'GourmetChef Pro Mixer'. It's fantastic! But I'm completely out of ideas for a main course. Do you happen to have a fantastic recipe for a beef wellington or a really impressive vegetarian lasagna that I could try? Something that would wow my guests!",
+      "expected_answer_contains": [
+        "not provide recipes",
+        "culinary advice",
+        "beyond our services",
+        "focus on product features"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q066",
+      "category": "out_of_scope",
+      "query": "I'm so frustrated with my calculus homework! I have this really complex integral to solve: \u222b(x^2 * e^x) dx. My 'StudyMax Tablet' is great for note-taking, but it's not helping me solve this. Can you provide a step-by-step solution or explain how to approach integration by parts for this specific problem?",
+      "expected_answer_contains": [
+        "math tutoring",
+        "academic assistance",
+        "not equipped to handle",
+        "recommend a tutor"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q067",
+      "category": "out_of_scope",
+      "query": "Urgent! I'm at a crossroads in my career and I really need some advice. I've been a software engineer for 10 years, using my 'CodeForge Xtreme Laptop' daily, but I'm thinking of switching to sustainable agriculture. What do you think is the best path forward for me? Should I go back to school or try an internship?",
+      "expected_answer_contains": [
+        "life advice",
+        "career counseling",
+        "cannot provide",
+        "personal decisions"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q068",
+      "category": "out_of_scope",
+      "query": "Hey, I'm trying to use the 'DataStream Pro' external hard drive to store data from a web scraping project, but my BeautifulSoup script keeps getting blocked by anti-bot measures. I need help modifying my Python headers and proxies to bypass these blocks. Can you tell me the best practices for ethical web scraping and how to avoid getting IP banned?",
+      "expected_answer_contains": [
+        "web scraping techniques",
+        "programming support",
+        "outside our expertise",
+        "consult a developer forum"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q069",
+      "category": "out_of_scope",
+      "query": "My new 'KitchenWhiz 3000' food processor is amazing, but I'm trying to impress my family with a fancy dessert. Do you have a secret recipe for a perfect, fluffy tiramisu or a rich chocolate lava cake? I want something truly decadent, not just a basic recipe from the internet.",
+      "expected_answer_contains": [
+        "not offer recipes",
+        "culinary guidance",
+        "focus on appliance use",
+        "external resources"
+      ],
+      "difficulty": "easy"
+    },
+    {
+      "id": "q070",
+      "category": "out_of_scope",
+      "query": "I'm completely stumped on a physics problem for my university course. It involves calculating the trajectory of a projectile with air resistance using differential equations. My 'QuantumCalc 5000' scientific calculator is powerful, but it's not showing me the solution. Can you explain how to set up and solve the equations for this?",
+      "expected_answer_contains": [
+        "physics problems",
+        "academic support",
+        "beyond our scope",
+        "seek an instructor"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "q071",
+      "category": "out_of_scope",
+      "query": "This is a bit personal, but I'm feeling really down. My partner and I have been having a lot of disagreements recently, and I don't know how to fix things. I use my 'ZenFlow Headphones' to relax, but it's not enough. Do you have any advice on how to communicate better in a relationship or effective conflict resolution strategies?",
+      "expected_answer_contains": [
+        "personal relationship advice",
+        "emotional support",
+        "cannot provide guidance",
+        "recommend professional help"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "q072",
+      "category": "out_of_scope",
+      "query": "We recently purchased several 'ServerGuard Pro' UPS units for our data center, and now I'm optimizing our SQL database queries. I have a particularly slow query involving multiple JOINs and subqueries. Can you analyze this query `SELECT a.id, b.name FROM table_a a JOIN table_b b ON a.b_id = b.id WHERE a.status = 'active' AND b.category = 'premium';` and suggest indexes or rewrites to improve its performance?",
+      "expected_answer_contains": [
+        "database optimization",
+        "SQL query tuning",
+        "not within our services",
+        "consult a DBA"
+      ],
+      "difficulty": "hard"
     }
   ]
 }
