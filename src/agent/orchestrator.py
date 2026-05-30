@@ -46,10 +46,44 @@ class Orchestrator:
         self.current_run: Dict[str, Any] = {}
         self.active_thread = None
         self._initialized = True
+        
+        # Initialize MongoDB connection or fallback
+        self.use_mongodb = False
+        self.mongo_client = None
+        self.db = None
+        self.history_collection = None
+        self._init_mongodb()
+        
         self._ensure_history_exists()
 
+    def _init_mongodb(self):
+        """Attempts to connect to MongoDB Cloud Atlas, falls back to local history.json."""
+        connection_string = os.getenv("MONGODB_CONNECTION_STRING")
+        if not connection_string:
+            self.log("ℹ️ MONGODB_CONNECTION_STRING not set in .env. Using local JSON history database.")
+            return
+
+        try:
+            from pymongo import MongoClient
+            self.log("🔌 Attempting to connect to MongoDB Cloud Atlas...")
+            # We set a 5 second server selection timeout to fail fast if connection cannot be made
+            self.mongo_client = MongoClient(connection_string, serverSelectionTimeoutMS=5000)
+            # Trigger a quick connection test (ping)
+            self.mongo_client.admin.command("ping")
+            
+            self.db = self.mongo_client["prompt_agent_db"]
+            self.history_collection = self.db["history"]
+            self.use_mongodb = True
+            self.log("✅ Successfully connected to MongoDB Cloud! Saving logs to cluster...")
+        except Exception as e:
+            self.log(f"⚠️ Failed to connect to MongoDB Cloud Atlas ({e}). Falling back to local JSON history database.")
+            self.use_mongodb = False
+            self.mongo_client = None
+            self.db = None
+            self.history_collection = None
+
     def _ensure_history_exists(self):
-        """Ensure the history JSON file and parent directories exist."""
+        """Ensure the local history JSON file exist (always keep for local fallback)."""
         self.history_path.parent.mkdir(parents=True, exist_ok=True)
         if not self.history_path.exists():
             with open(self.history_path, "w") as f:
@@ -62,8 +96,22 @@ class Orchestrator:
         print(log_entry)
         self.logs.append(log_entry)
 
+    def _serialize_mongo_document(self, doc: dict) -> dict:
+        """Convert BSON ObjectIds to standard strings for JSON-serializable API responses."""
+        if doc and "_id" in doc:
+            doc["_id"] = str(doc["_id"])
+        return doc
+
     def get_history(self) -> List[Dict[str, Any]]:
-        """Retrieve execution history from the local JSON store."""
+        """Retrieve execution history from MongoDB Cloud or local JSON store."""
+        if self.use_mongodb:
+            try:
+                cursor = self.history_collection.find().sort("timestamp", -1)
+                return [self._serialize_mongo_document(doc) for doc in cursor]
+            except Exception as e:
+                self.log(f"⚠️ Error reading from MongoDB, falling back to local JSON history: {e}")
+                
+        # Local JSON fallback
         try:
             with open(self.history_path) as f:
                 return json.load(f)
@@ -71,11 +119,27 @@ class Orchestrator:
             return []
 
     def _save_to_history(self, run_record: Dict[str, Any]):
-        """Append a completed run record to data/history.json."""
+        """Save a completed run record to MongoDB Cloud or local JSON store."""
+        if self.use_mongodb:
+            try:
+                # Save to Cloud Atlas
+                self.history_collection.insert_one(run_record.copy())
+                self.log("💾 Run execution history saved successfully to MongoDB Cloud!")
+                return
+            except Exception as e:
+                self.log(f"⚠️ Error writing to MongoDB, falling back to local JSON: {e}")
+
+        # Local JSON fallback
         history = self.get_history()
-        history.insert(0, run_record)  # Insert newest at top
+        # Ensure we don't save MongoDB BSON objects back to JSON
+        clean_record = run_record.copy()
+        if "_id" in clean_record:
+            del clean_record["_id"]
+            
+        history.insert(0, clean_record)
         with open(self.history_path, "w") as f:
             json.dump(history, f, indent=2)
+        self.log("💾 Run execution history saved locally to history.json.")
 
     def trigger_loop_async(self, project_name: str, force_optimize: bool = False):
         """

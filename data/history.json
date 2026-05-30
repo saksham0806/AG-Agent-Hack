@@ -1,5 +1,23 @@
 [
   {
+    "timestamp": "2026-05-30T12:19:36.173743",
+    "project": "llm-eval-agent-v2",
+    "status": "SUCCESS",
+    "initial_score": 0.6,
+    "final_score": 0.8,
+    "winner_strategy": "v1_conservative",
+    "mr_url": "https://gitlab.com/sakshamsingh0806alt/llm-eval-agent/-/merge_requests/5",
+    "failures_found": 1,
+    "diagnosed_clusters": [
+      {
+        "category": "product_recommendation",
+        "failure_pattern": "Response truncated before delivering the core product recommendation due to verbose introduction, violating immediate core delivery and truncation prevention rules.",
+        "count": 1
+      }
+    ],
+    "production_score": 0.95
+  },
+  {
     "timestamp": "2026-05-30T11:51:50.111884",
     "project": "llm-eval-agent-v2",
     "status": "SUCCESS",
