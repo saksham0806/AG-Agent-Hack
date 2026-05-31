@@ -9,6 +9,7 @@ import os
 import json
 import time
 import threading
+import asyncio
 from datetime import datetime
 from typing import Dict, Any, List
 import pandas as pd
@@ -184,9 +185,9 @@ class Orchestrator:
         try:
             # Step 1: FETCHING_SPANS
             self.status = "FETCHING_SPANS"
-            self.log("[Step 1/6] Querying conversation trace spans from Arize Phoenix Cloud...")
+            self.log("[Step 1/6] Querying conversation trace spans from Arize Phoenix Cloud via MCP...")
             monitor = PromptMonitor()
-            spans_df = monitor.fetch_recent_spans(project_name)
+            spans_df = asyncio.run(monitor.fetch_recent_spans(project_name))
             
             # Step 2: RUNNING_JUDGES
             self.status = "RUNNING_JUDGES"
@@ -350,10 +351,10 @@ class Orchestrator:
 
                 # 2. Deploy to GitLab
                 deployer = GitLabDeployer()
-                deploy_res = deployer.deploy_optimized_prompt(prompts_data, eval_report)
+                deploy_res = asyncio.run(deployer.deploy_optimized_prompt(prompts_data, eval_report))
                 mr_url = deploy_res.get("mr_url", "N/A")
                 run_record["mr_url"] = mr_url
-                self.log(f"   GitLab Merge Request successfully opened! MR URL: {mr_url}")
+                self.log(f"   GitLab Merge Request successfully opened via MCP! MR URL: {mr_url}")
             else:
                 self.log("⚠️ Optimization did not beat baseline or baseline was selected. Local prompt config kept.")
                 run_record["mr_url"] = "N/A"

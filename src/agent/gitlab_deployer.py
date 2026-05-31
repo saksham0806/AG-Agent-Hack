@@ -9,9 +9,12 @@ import os
 import json
 import urllib.parse
 import time
+import base64
 from typing import Dict, Any
-import httpx
 from dotenv import load_dotenv
+from google.adk.tools import McpToolset
+from google.adk.tools.mcp_tool.mcp_toolset import StdioConnectionParams
+from mcp import StdioServerParameters
 
 # Load environment variables
 load_dotenv()
@@ -29,17 +32,32 @@ class GitLabDeployer:
         if not self.project_id:
             raise ValueError("GITLAB_PROJECT_ID is not set in the environment variables.")
 
-        # URL encode the project ID (e.g. sakshamsingh0806alt/llm-eval-agent -> sakshamsingh0806alt%2Fllm-eval-agent)
-        self.encoded_project_id = urllib.parse.quote_plus(self.project_id)
-        
-        # Initialize httpx synchronous client with authentication headers
-        self.client = httpx.Client(
-            headers={
-                "PRIVATE-TOKEN": self.pat,
-                "Content-Type": "application/json"
-            },
-            timeout=30.0
+        # Sanitize GitLab URL (Strip trailing /api/v4 or api/v4 if present)
+        # E.g. https://gitlab.com/api/v4 -> https://gitlab.com
+        base_url = self.api_url
+        if base_url.endswith("/api/v4"):
+            base_url = base_url[:-7]
+        elif base_url.endswith("api/v4"):
+            base_url = base_url[:-6]
+        base_url = base_url.rstrip("/")
+
+        # Initialize GitLab MCP parameters
+        self.gitlab_params = StdioConnectionParams(
+            server_params=StdioServerParameters(
+                command="npx",
+                args=["-y", "@structured-world/gitlab-mcp"],
+                env={
+                    "GITLAB_PERSONAL_ACCESS_TOKEN": self.pat,
+                    "GITLAB_TOKEN": self.pat,
+                    "GITLAB_PROJECT_ID": self.project_id,
+                    "GITLAB_API_URL": base_url,
+                    "GITLAB_BASE_URL": base_url,
+                    "PATH": os.getenv("PATH", "")
+                }
+            ),
+            timeout=15.0
         )
+
 
     def _generate_mr_description(self, eval_report: Dict[str, Any]) -> str:
         """
@@ -120,9 +138,9 @@ The programmatically selected winner is **`{winner_id}` ({winner_strategy})**, w
 """
         return mr_desc
 
-    def deploy_optimized_prompt(self, optimized_prompts_dict: dict, eval_report: Dict[str, Any]) -> Dict[str, Any]:
+    async def deploy_optimized_prompt(self, optimized_prompts_dict: dict, eval_report: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Full GitOps lifecycle deployment:
+        Full GitOps lifecycle deployment using GitLab MCP server:
         1. Create new branch off default branch
         2. Commit prompts.json changes to the branch
         3. Create a GitLab Merge Request pointing to default branch with rich descriptions.
@@ -132,102 +150,81 @@ The programmatically selected winner is **`{winner_id}` ({winner_strategy})**, w
         winner = eval_report.get("winner", {})
         winner_strategy = eval_report.get("winner_strategy", "baseline")
         
-        print(f"\n🚀 Initiating GitLab prompt deployment for project '{self.project_id}'...")
+        print(f"\n🚀 Initiating GitLab prompt deployment via MCP for project '{self.project_id}'...")
         
-        # Step 1: Create a new branch
-        print(f"  [1/3] Creating new branch '{branch_name}' branching from '{self.default_branch}'...")
-        create_branch_url = f"{self.api_url}/projects/{self.encoded_project_id}/repository/branches"
+        # Initialize toolset
+        toolset = McpToolset(connection_params=self.gitlab_params)
         try:
-            res = self.client.post(
-                create_branch_url,
-                json={
+            # Load tools from MCP server
+            await toolset.get_tools()
+            session = toolset._mcp_session_manager._sessions['stdio_session'][0]
+            
+            # Step 1: Create a new branch
+            print(f"  [1/3] Creating new branch '{branch_name}' branching from '{self.default_branch}' via MCP...")
+            create_branch_res = await session.call_tool(
+                "create_branch",
+                {
+                    "project_id": self.project_id,
                     "branch": branch_name,
                     "ref": self.default_branch
                 }
             )
-            if res.status_code != 201:
-                raise httpx.HTTPStatusError(
-                    f"GitLab branch creation failed with status {res.status_code}: {res.text}",
-                    request=res.request,
-                    response=res
-                )
-            print(f"  ✅ Branch '{branch_name}' created successfully!")
-        except Exception as e:
-            print(f"  ❌ Error creating branch on GitLab: {e}")
-            raise e
+            if create_branch_res.isError:
+                err_text = create_branch_res.content[0].text if create_branch_res.content else "Unknown error"
+                raise RuntimeError(f"GitLab branch creation failed: {err_text}")
+            print(f"  ✅ Branch '{branch_name}' created successfully via MCP!")
 
-        # Step 2: Commit prompts.json modification
-        print(f"  [2/3] Committing updated prompts.json config to branch '{branch_name}'...")
-        commit_url = f"{self.api_url}/projects/{self.encoded_project_id}/repository/commits"
-        
-        # Prepare file content
-        file_content = json.dumps(optimized_prompts_dict, indent=2)
-        
-        commit_payload = {
-            "branch": branch_name,
-            "commit_message": f"chore: optimize customer_support system prompt to version 1.1.0 ({winner_strategy})",
-            "actions": [
+            # Step 2: Commit prompts.json modification
+            print(f"  [2/3] Committing updated prompts.json config to branch '{branch_name}' via MCP...")
+            file_content = json.dumps(optimized_prompts_dict, indent=2)
+            # Base64 encode file content as required by the GitLab MCP tool
+            encoded_content = base64.b64encode(file_content.encode("utf-8")).decode("utf-8")
+            
+            # URL-encode the file path as expected by GitLab and the MCP schema
+            encoded_file_path = urllib.parse.quote("src/prompts.json", safe="")
+            
+            commit_msg = f"chore: optimize customer_support system prompt to version 1.1.0 ({winner_strategy})"
+            commit_res = await session.call_tool(
+                "create_or_update_file",
                 {
-                    "action": "update",
-                    "file_path": "src/prompts.json",
-                    "content": file_content
+                    "project_id": self.project_id,
+                    "file_path": encoded_file_path,
+                    "branch": branch_name,
+                    "content": encoded_content,
+                    "encoding": "base64",
+                    "commit_message": commit_msg
                 }
-            ]
-        }
-        
-        try:
-            res = self.client.post(commit_url, json=commit_payload)
-            if res.status_code != 201:
-                # If error is that file doesn't exist, retry with "create" action
-                err_text = res.text
-                if res.status_code == 400 and ("doesn't exist" in err_text or "does not exist" in err_text):
-                    print("  ⚠️ File 'src/prompts.json' does not exist remotely. Retrying with 'create' action...")
-                    commit_payload["actions"][0]["action"] = "create"
-                    res = self.client.post(commit_url, json=commit_payload)
-                    if res.status_code != 201:
-                        raise httpx.HTTPStatusError(
-                            f"GitLab commit retry failed with status {res.status_code}: {res.text}",
-                            request=res.request,
-                            response=res
-                        )
-                else:
-                    raise httpx.HTTPStatusError(
-                        f"GitLab commit failed with status {res.status_code}: {res.text}",
-                        request=res.request,
-                        response=res
-                    )
-            print("  ✅ Prompts committed successfully!")
-        except Exception as e:
-            print(f"  ❌ Error committing prompt configuration: {e}")
-            raise e
+            )
+            if commit_res.isError:
+                err_text = commit_res.content[0].text if commit_res.content else "Unknown error"
+                raise RuntimeError(f"GitLab commit failed: {err_text}")
+            print("  ✅ Prompts committed successfully via MCP!")
 
-        # Step 3: Open a Merge Request
-        print(f"  [3/3] Opening GitLab Merge Request from '{branch_name}' to '{self.default_branch}'...")
-        mr_url = f"{self.api_url}/projects/{self.encoded_project_id}/merge_requests"
-        
-        title = f"chore(prompt): optimize customer_support system prompt to v1.1.0 ({winner_strategy})"
-        description = self._generate_mr_description(eval_report)
-        
-        mr_payload = {
-            "source_branch": branch_name,
-            "target_branch": self.default_branch,
-            "title": title,
-            "description": description,
-            "remove_source_branch": True  # Automatically clean up branch after merging
-        }
-        
-        try:
-            res = self.client.post(mr_url, json=mr_payload)
-            if res.status_code != 201:
-                raise httpx.HTTPStatusError(
-                    f"GitLab Merge Request creation failed with status {res.status_code}: {res.text}",
-                    request=res.request,
-                    response=res
-                )
-            mr_data = res.json()
-            mr_web_url = mr_data.get("web_url")
-            mr_id = mr_data.get("iid")
-            print(f"  ✅ GitLab Merge Request opened successfully!")
+            # Step 3: Open a Merge Request
+            print(f"  [3/3] Opening GitLab Merge Request from '{branch_name}' to '{self.default_branch}' via MCP...")
+            title = f"chore(prompt): optimize customer_support system prompt to v1.1.0 ({winner_strategy})"
+            description = self._generate_mr_description(eval_report)
+            
+            mr_res = await session.call_tool(
+                "create_merge_request",
+                {
+                    "project_id": self.project_id,
+                    "title": title,
+                    "source_branch": branch_name,
+                    "target_branch": self.default_branch,
+                    "description": description
+                }
+            )
+            if mr_res.isError:
+                err_text = mr_res.content[0].text if mr_res.content else "Unknown error"
+                raise RuntimeError(f"GitLab Merge Request creation failed: {err_text}")
+                
+            mr_data_text = mr_res.content[0].text if mr_res.content else "{}"
+            mr_data = json.loads(mr_data_text)
+            
+            mr_web_url = mr_data.get("web_url", "")
+            mr_id = mr_data.get("iid", 0)
+            print(f"  ✅ GitLab Merge Request opened successfully via MCP!")
             print(f"  🔗 Merge Request URL: {mr_web_url}")
             
             return {
@@ -237,8 +234,11 @@ The programmatically selected winner is **`{winner_id}` ({winner_strategy})**, w
                 "status": "success"
             }
         except Exception as e:
-            print(f"  ❌ Error opening Merge Request: {e}")
+            print(f"  ❌ Error deploying via GitLab MCP: {e}")
             raise e
+        finally:
+            print("  Closing GitLab MCP Toolset session...")
+            await toolset.close()
 
 
 if __name__ == "__main__":

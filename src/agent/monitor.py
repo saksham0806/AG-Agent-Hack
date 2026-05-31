@@ -7,6 +7,8 @@ and identifies prompt templates that need optimization.
 
 import os
 import pandas as pd
+import json
+import asyncio
 from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass
 from dotenv import load_dotenv
@@ -14,6 +16,9 @@ from dotenv import load_dotenv
 import phoenix as px
 from phoenix.evals import LLM, ClassificationEvaluator, evaluate_dataframe
 from phoenix.client import Client as PhoenixClient
+from google.adk.tools import McpToolset
+from google.adk.tools.mcp_tool.mcp_toolset import StdioConnectionParams
+from mcp import StdioServerParameters
 
 # Load environment variables
 load_dotenv()
@@ -78,39 +83,93 @@ class PromptMonitor:
             raise ValueError("PHOENIX_API_KEY is not set in the environment variables.")
             
         print(f"Initializing Phoenix Client with base_url: {endpoint}")
+        # Keep client strictly for writing annotations back (since the MCP server lacks an annotation tool)
         self.client = PhoenixClient(
             base_url=endpoint,
             api_key=api_key
         )
-    
-    def fetch_recent_spans(self, project_name: str, hours: int = LOOKBACK_HOURS) -> pd.DataFrame:
-        """Fetch LLM spans from the last N hours for evaluation."""
-        start_time = datetime.now(timezone.utc) - timedelta(hours=hours)
-        print(f"Fetching spans for project '{project_name}' since {start_time.isoformat()}...")
         
-        # Retrieve all spans as a DataFrame
+        # Initialize Arize Phoenix MCP parameters
+        self.phoenix_params = StdioConnectionParams(
+            server_params=StdioServerParameters(
+                command="npx",
+                args=[
+                    "-y",
+                    "@arizeai/phoenix-mcp@latest",
+                    "--baseUrl", endpoint,
+                    "--apiKey", api_key
+                ],
+                env={
+                    "PATH": os.getenv("PATH", "")
+                }
+            ),
+            timeout=15.0
+        )
+    
+    async def fetch_recent_spans(self, project_name: str, hours: int = LOOKBACK_HOURS) -> pd.DataFrame:
+        """Fetch LLM spans from the last N hours using Arize Phoenix MCP toolset."""
+        start_time = datetime.now(timezone.utc) - timedelta(hours=hours)
+        start_time_iso = start_time.isoformat()
+        print(f"Fetching spans via MCP for project '{project_name}' since {start_time_iso}...")
+        
+        toolset = McpToolset(connection_params=self.phoenix_params)
         try:
-            spans_df = self.client.spans.get_spans_dataframe(
-                project_name=project_name,
-                start_time=start_time
+            # Start MCP session and load tools
+            await toolset.get_tools()
+            session = toolset._mcp_session_manager._sessions['stdio_session'][0]
+            
+            # Fetch spans using get-spans tool
+            print(f"  Calling get-spans MCP tool for project: '{project_name}'...")
+            res = await session.call_tool(
+                "get-spans",
+                {
+                    "project_identifier": project_name,
+                    "start_time": start_time_iso,
+                    "limit": 100
+                }
             )
+            
+            if res.isError:
+                err_text = res.content[0].text if res.content else "Unknown error"
+                raise RuntimeError(f"Phoenix get-spans MCP tool failed: {err_text}")
+                
+            res_text = res.content[0].text if res.content else "{}"
+            spans_data = json.loads(res_text)
+            raw_spans = spans_data.get("spans", [])
+            
+            print(f"  ✅ Successfully retrieved {len(raw_spans)} spans via MCP!")
+            
+            # Flatten the nested spans structure for compatibility with existing pandas parsing
+            spans_list = []
+            for s in raw_spans:
+                span_dict = {
+                    "id": s.get("id"),
+                    "name": s.get("name"),
+                    "span_id": s.get("context", {}).get("span_id"),
+                    "trace_id": s.get("context", {}).get("trace_id"),
+                    "start_time": s.get("start_time"),
+                    "end_time": s.get("end_time")
+                }
+                
+                # Flatten the attributes dict: e.g. "input.value" -> "attributes.input.value" and "input.value"
+                attrs = s.get("attributes", {})
+                for k, v in attrs.items():
+                    span_dict[k] = v
+                    span_dict[f"attributes.{k}"] = v
+                    
+                spans_list.append(span_dict)
+                
+            spans_df = pd.DataFrame(spans_list)
+            if not spans_df.empty:
+                spans_df.set_index("id", inplace=True, drop=False)
+                
+            return spans_df
         except Exception as e:
-            print(f"⚠️ Error fetching spans from Phoenix: {e}")
+            print(f"⚠️ Error fetching spans from Phoenix MCP: {e}")
             return pd.DataFrame()
-            
-        if spans_df.empty:
-            print("No spans found in the specified window.")
-            return pd.DataFrame()
-            
-        # Filter for LLM span kinds to evaluate only actual model executions
-        if "span_kind" in spans_df.columns:
-            llm_spans = spans_df[spans_df["span_kind"] == "LLM"].copy()
-        else:
-            print("⚠️ 'span_kind' column not found in spans DataFrame. Proceeding with all spans.")
-            llm_spans = spans_df.copy()
-            
-        print(f"Found {len(llm_spans)} LLM spans.")
-        return llm_spans
+        finally:
+            print("  Closing Arize Phoenix MCP Toolset session...")
+            await toolset.close()
     
     def normalize_dataframe(self, spans_df: pd.DataFrame) -> pd.DataFrame:
         """Normalize DataFrame columns so that they map cleanly to 'input' and 'output'."""
@@ -279,9 +338,9 @@ class PromptMonitor:
             
         return reports
         
-    def run_monitoring_loop(self, project_name: str) -> list[PromptPerformanceReport]:
+    async def run_monitoring_loop(self, project_name: str) -> list[PromptPerformanceReport]:
         """Runs the complete monitoring process: fetch, evaluate, log, and analyze."""
-        spans_df = self.fetch_recent_spans(project_name)
+        spans_df = await self.fetch_recent_spans(project_name)
         
         if spans_df.empty:
             print("⚠️ No traces found to evaluate.")
@@ -305,4 +364,4 @@ if __name__ == "__main__":
     monitor = PromptMonitor()
     project = os.getenv("PHOENIX_PROJECT_NAME", "llm-eval-agent")
     print(f"Running standalone monitor test for project: {project}")
-    monitor.run_monitoring_loop(project)
+    asyncio.run(monitor.run_monitoring_loop(project))
