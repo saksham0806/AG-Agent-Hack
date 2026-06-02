@@ -88,6 +88,10 @@ async def get_status():
             "failures_found": last_run.get("failures_found"),
             "winner_strategy": last_run.get("winner_strategy"),
             "mr_url": last_run.get("mr_url"),
+            "mr_iid": last_run.get("mr_iid"),
+            "production_score": last_run.get("production_score"),
+            "final_production_score": last_run.get("final_production_score"),
+            "uplift": last_run.get("uplift"),
             "diagnosed_clusters": last_run.get("diagnosed_clusters", [])
         }
 
@@ -97,6 +101,7 @@ async def get_status():
             "logs": orchestrator.logs,
             "active_prompt": active_prompt,
             "last_run": last_run_stats,
+            "active_mr": getattr(orchestrator, "active_mr", {}),
             "history": history
         }
     )
@@ -121,6 +126,42 @@ async def trigger_loop(request: Request):
             "message": "Autonomous optimization loop started successfully." if triggered else "Orchestrator is already running a cycle."
         }
     )
+
+
+@app.post("/api/merge_mr")
+async def merge_mr_endpoint():
+    """Trigger programmatic Merge Request merge via GitLab MCP."""
+    active_mr = getattr(orchestrator, "active_mr", {})
+    mr_iid = active_mr.get("iid")
+    
+    if not mr_iid:
+        return JSONResponse(
+            status_code=400,
+            content={"success": False, "message": "No active Merge Request currently waiting for merge."}
+        )
+        
+    try:
+        from src.agent.gitlab_deployer import GitLabDeployer
+        deployer = GitLabDeployer()
+        
+        orchestrator.log(f"🔗 Received front-end trigger to merge MR IID '{mr_iid}' via MCP...")
+        merge_res = await deployer.merge_mr(mr_iid)
+        
+        orchestrator.log(f"✅ Merge command completed via MCP. Response state: {merge_res.get('state')}")
+        
+        return JSONResponse(
+            content={
+                "success": True,
+                "message": f"Merge Request !{mr_iid} successfully merged via GitLab MCP!",
+                "data": merge_res
+            }
+        )
+    except Exception as e:
+        orchestrator.log(f"❌ Front-end merge trigger failed: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "message": f"Failed to merge Merge Request: {str(e)}"}
+        )
 
 
 @app.get("/api/history")

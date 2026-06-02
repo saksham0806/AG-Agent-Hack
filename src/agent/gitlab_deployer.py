@@ -240,6 +240,48 @@ The programmatically selected winner is **`{winner_id}` ({winner_strategy})**, w
             print("  Closing GitLab MCP Toolset session...")
             await toolset.close()
 
+    async def get_mr_status(self, mr_iid: str) -> dict:
+        """Query GitLab MCP server to get the status of an MR."""
+        print(f"📡 Querying GitLab MCP for MR IID '{mr_iid}' status...")
+        toolset = McpToolset(connection_params=self.gitlab_params)
+        try:
+            await toolset.get_tools()
+            session = toolset._mcp_session_manager._sessions['stdio_session'][0]
+            res = await session.call_tool("get_merge_request", {
+                "project_id": self.project_id,
+                "merge_request_iid": str(mr_iid)
+            })
+            if res.isError:
+                err_text = res.content[0].text if res.content else "Unknown error"
+                raise RuntimeError(f"GitLab get_merge_request failed: {err_text}")
+            
+            res_text = res.content[0].text if res.content else "{}"
+            return json.loads(res_text)
+        finally:
+            await toolset.close()
+
+    async def merge_mr(self, mr_iid: str) -> dict:
+        """Programmatically merge the MR via GitLab MCP."""
+        print(f"🚀 Programmatically merging GitLab MR IID '{mr_iid}' via MCP...")
+        toolset = McpToolset(connection_params=self.gitlab_params)
+        try:
+            await toolset.get_tools()
+            session = toolset._mcp_session_manager._sessions['stdio_session'][0]
+            res = await session.call_tool("merge_merge_request", {
+                "project_id": self.project_id,
+                "merge_request_iid": str(mr_iid),
+                "should_remove_source_branch": True
+            })
+            if res.isError:
+                err_text = res.content[0].text if res.content else "Unknown error"
+                raise RuntimeError(f"GitLab merge_merge_request failed: {err_text}")
+            
+            res_text = res.content[0].text if res.content else "{}"
+            return json.loads(res_text)
+        finally:
+            await toolset.close()
+
+
 
 if __name__ == "__main__":
     # Standard dummy test

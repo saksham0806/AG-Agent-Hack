@@ -44,6 +44,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const pDesc = document.getElementById("prompt-desc");
     const pInstructions = document.getElementById("prompt-instructions");
 
+    // --- Closed-Loop UI Elements ---
+    const closedLoopCard = document.getElementById("closed-loop-card");
+    const closedLoopStatus = document.getElementById("closed-loop-status");
+    const mrDetailIid = document.getElementById("mr-detail-iid");
+    const mrDetailState = document.getElementById("mr-detail-state");
+    const mrDetailUrl = document.getElementById("mr-detail-url");
+    const btnMergeMr = document.getElementById("btn-merge-mr");
+    const mergeSpinner = document.getElementById("merge-spinner");
+    const upliftBaseline = document.getElementById("uplift-baseline");
+    const upliftOptimized = document.getElementById("uplift-optimized");
+    const upliftBadgeContainer = document.getElementById("uplift-badge-container");
+    const upliftResult = document.getElementById("uplift-result");
+
     let displayedLogLength = 0;
     let isPollingActive = true;
 
@@ -100,7 +113,15 @@ document.addEventListener("DOMContentLoaded", () => {
         btnTriggerOptimization.disabled = isRunning;
         btnForceOptimization.disabled = isRunning;
 
-        if (isRunning) {
+        if (status === "WAITING_FOR_MERGE") {
+            globalStatusDot.classList.add("running");
+            globalStatusText.textContent = "Waiting for Merge";
+            terminalBadgeRunning.classList.remove("hide");
+        } else if (status === "VERIFYING_PRODUCTION_UPLIFT") {
+            globalStatusDot.classList.add("running");
+            globalStatusText.textContent = "Verifying Uplift";
+            terminalBadgeRunning.classList.remove("hide");
+        } else if (isRunning) {
             globalStatusDot.classList.add("running");
             globalStatusText.textContent = `Running: ${status}`;
             terminalBadgeRunning.classList.remove("hide");
@@ -130,6 +151,8 @@ document.addEventListener("DOMContentLoaded", () => {
             "OPTIMIZING_PROMPTS": { percent: 75, text: "[4/6] Generating prompt variants via Gemini..." },
             "SHADOW_EVALUATIONS": { percent: 90, text: "[5/6] Running shadow evaluations..." },
             "OPENING_MERGE_REQUEST": { percent: 95, text: "[6/6] Launching GitLab MR deployment..." },
+            "WAITING_FOR_MERGE": { percent: 97, text: "Waiting for Merge Request approval & merge..." },
+            "VERIFYING_PRODUCTION_UPLIFT": { percent: 99, text: "Merge approved! Verifying production correctness uplift..." },
             "COMPLETED": { percent: 100, text: "Autonomous loop completed successfully!" },
             "FAILED": { percent: 100, text: "Autonomous loop execution failed!" }
         };
@@ -365,6 +388,89 @@ document.addEventListener("DOMContentLoaded", () => {
                 statMrLink.textContent = "GitOps prompts configuration is active";
             }
 
+            // --- Update Closed-Loop Verification Panel ---
+            const activeMr = data.active_mr || {};
+            
+            if ((data.status === "WAITING_FOR_MERGE" || data.status === "VERIFYING_PRODUCTION_UPLIFT" || (lastRun && lastRun.status === "SUCCESS" && lastRun.mr_url && lastRun.mr_url !== "N/A")) && activeMr && activeMr.iid) {
+                closedLoopCard.classList.remove("hide");
+                
+                if (data.status === "WAITING_FOR_MERGE") {
+                    closedLoopStatus.textContent = "WAITING FOR MERGE";
+                    closedLoopStatus.style.background = "rgba(168, 85, 247, 0.15)";
+                    closedLoopStatus.style.color = "hsl(270, 95%, 75%)";
+                    closedLoopStatus.style.borderColor = "rgba(168, 85, 247, 0.25)";
+                    
+                    mrDetailState.textContent = "Open (Waiting)";
+                    mrDetailState.className = "detail-value text-gold";
+                    btnMergeMr.disabled = false;
+                    mergeSpinner.classList.add("hide");
+                } else if (data.status === "VERIFYING_PRODUCTION_UPLIFT") {
+                    closedLoopStatus.textContent = "VERIFYING UPLIFT";
+                    closedLoopStatus.style.background = "rgba(234, 179, 8, 0.15)";
+                    closedLoopStatus.style.color = "var(--color-gold)";
+                    closedLoopStatus.style.borderColor = "rgba(234, 179, 8, 0.25)";
+                    
+                    mrDetailState.textContent = "Merged (Verifying)";
+                    mrDetailState.className = "detail-value text-green";
+                    btnMergeMr.disabled = true;
+                    mergeSpinner.classList.remove("hide");
+                } else {
+                    closedLoopStatus.textContent = "UPLIFT VERIFIED";
+                    closedLoopStatus.style.background = "rgba(0, 201, 87, 0.15)";
+                    closedLoopStatus.style.color = "var(--color-emerald)";
+                    closedLoopStatus.style.borderColor = "rgba(0, 201, 87, 0.25)";
+                    
+                    mrDetailState.textContent = "Merged (Complete)";
+                    mrDetailState.className = "detail-value text-green";
+                    btnMergeMr.disabled = true;
+                    mergeSpinner.classList.add("hide");
+                }
+                
+                mrDetailIid.textContent = `!${activeMr.iid}`;
+                mrDetailUrl.href = activeMr.url;
+                
+                // Update uplift metrics
+                if (lastRun && lastRun.mr_url && lastRun.mr_url !== "N/A") {
+                    upliftBaseline.textContent = `${(lastRun.initial_score * 100).toFixed(1)}%`;
+                    
+                    if (lastRun.final_production_score) {
+                        upliftOptimized.textContent = `${(lastRun.final_production_score * 100).toFixed(1)}%`;
+                        const uplift = (lastRun.uplift || 0) * 100;
+                        upliftResult.textContent = `Uplift: ${uplift >= 0 ? "+" : ""}${uplift.toFixed(1)}%`;
+                        upliftBadgeContainer.classList.remove("hide");
+                    } else {
+                        upliftOptimized.textContent = "--%";
+                        upliftBadgeContainer.classList.add("hide");
+                    }
+                } else {
+                    upliftBaseline.textContent = "--%";
+                    upliftOptimized.textContent = "--%";
+                    upliftBadgeContainer.classList.add("hide");
+                }
+            } else if (lastRun && lastRun.mr_url && lastRun.mr_url !== "N/A" && lastRun.final_production_score) {
+                // If the loop finished and we have a verified run in history, show the completed uplift metrics
+                closedLoopCard.classList.remove("hide");
+                closedLoopStatus.textContent = "UPLIFT VERIFIED";
+                closedLoopStatus.style.background = "rgba(0, 201, 87, 0.15)";
+                closedLoopStatus.style.color = "var(--color-emerald)";
+                closedLoopStatus.style.borderColor = "rgba(0, 201, 87, 0.25)";
+                
+                mrDetailIid.textContent = `!${lastRun.mr_url.split("/").pop()}`;
+                mrDetailUrl.href = lastRun.mr_url;
+                mrDetailState.textContent = "Merged (Complete)";
+                mrDetailState.className = "detail-value text-green";
+                btnMergeMr.disabled = true;
+                mergeSpinner.classList.add("hide");
+                
+                upliftBaseline.textContent = `${(lastRun.initial_score * 100).toFixed(1)}%`;
+                upliftOptimized.textContent = `${(lastRun.final_production_score * 100).toFixed(1)}%`;
+                const uplift = (lastRun.uplift || 0) * 100;
+                upliftResult.textContent = `Uplift: ${uplift >= 0 ? "+" : ""}${uplift.toFixed(1)}%`;
+                upliftBadgeContainer.classList.remove("hide");
+            } else {
+                closedLoopCard.classList.add("hide");
+            }
+
             // 6. History Table
             renderHistoryTable(data.history);
 
@@ -409,9 +515,39 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // --- Manual MR Merge Call ---
+    async function mergeMR() {
+        btnMergeMr.disabled = true;
+        mergeSpinner.classList.remove("hide");
+        
+        try {
+            const response = await fetch("/api/merge_mr", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            if (!response.ok) throw new Error("Merge request failed.");
+            
+            const data = await response.json();
+            if (data.success) {
+                // Instantly query status to update UI
+                await fetchStatus();
+            } else {
+                alert(`⚠️ Merge failed: ${data.message}`);
+                btnMergeMr.disabled = false;
+                mergeSpinner.classList.add("hide");
+            }
+        } catch (e) {
+            console.error("Error merging MR:", e);
+            alert("❌ An error occurred while programmatically merging the MR.");
+            btnMergeMr.disabled = false;
+            mergeSpinner.classList.add("hide");
+        }
+    }
+
     // --- Event Listeners ---
     btnTriggerOptimization.addEventListener("click", () => triggerAgentLoop(false));
     btnForceOptimization.addEventListener("click", () => triggerAgentLoop(true));
+    btnMergeMr.addEventListener("click", mergeMR);
     btnRefreshHistory.addEventListener("click", () => {
         fetchStatus();
     });
