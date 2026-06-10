@@ -40,3 +40,7 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "N"]
 ignore = []
+
+[tool.vercel]
+entrypoint = "src.dashboard.app:app"
+
