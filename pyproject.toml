@@ -11,7 +11,8 @@ authors = [
 dependencies = [
     "google-adk>=2.1.0",
     "google-genai>=1.75.0",
-    "arize-phoenix>=16.3.0",
+    "arize-phoenix-client>=2.7.0",
+    "arize-phoenix-evals>=3.1.0",
     "arize-phoenix-otel>=0.16.1",
     "openinference-instrumentation-google-adk>=0.1.15",
     "openinference-instrumentation-google-genai>=1.0.2",
@@ -25,6 +26,9 @@ dependencies = [
     "pydantic>=2.13.4",
     "pandas>=3.0.3",
     "numpy>=2.4.6",
+    "mcp>=1.2.0",
+    "pymongo>=4.0.0",
+    "dnspython>=2.0.0",
 ]
 
 [dependency-groups]

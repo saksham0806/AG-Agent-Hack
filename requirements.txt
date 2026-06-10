@@ -3,7 +3,8 @@ google-adk>=1.0.0
 google-genai>=1.0.0
 
 # Arize Phoenix (Observability)
-arize-phoenix>=8.0.0
+arize-phoenix-client>=2.7.0
+arize-phoenix-evals>=3.1.0
 arize-phoenix-otel>=0.8.0
 openinference-instrumentation-google-adk>=0.1.0
 openinference-instrumentation-google-genai>=1.0.0
@@ -27,3 +28,5 @@ numpy>=1.24.0
 # Database
 pymongo>=4.0.0
 dnspython>=2.0.0
+mcp>=1.2.0
+

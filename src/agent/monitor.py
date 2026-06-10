@@ -13,7 +13,6 @@ from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass
 from dotenv import load_dotenv
 
-import phoenix as px
 from phoenix.evals import LLM, ClassificationEvaluator, evaluate_dataframe
 from phoenix.client import Client as PhoenixClient
 from google.adk.tools import McpToolset
